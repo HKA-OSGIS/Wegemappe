@@ -71,6 +71,6 @@ For CSV, open in Excel to view the gas station details and coordinates.
 
 For other formats, use compatible GIS tools or mapping applications.
 
-That produced a csv, and then it was converted to geojson.
+
 =======
 >>>>>>> 8d3c31b (Added Gas Stations Locations data and updated Readme.md)
