@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Route Optimise</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+    <div class="header">
+        <h1></h1>
+        <p></p>
+      </div>
+
+      <div class="topnav">
+        <a href="forward_geoencoder.html">Link</a>
+        <a href="geoencoder_leaflet.html">Link</a>
+        <a href="#">Link</a>
+      </div>
+
+      <div class="row">
+        
+        <div class="column">
+          <h2></h2>
+          <div id="map"></div>
+        </div>       
+       
+        <h2></h2>
+        <div id="controls">
+            <h3></h3>
+            <label for="startLat">Start Latitude:</label>
+            <input type="text" id="startLat" placeholder="Start Lat">
+            <br>
+            <label for="startLng">Start Longitude:</label>
+            <input type="text" id="startLng" placeholder="Start Lng">
+            <br>
+            <label for="endLat">End Latitude:</label>
+            <input type="text" id="endLat" placeholder="End Lat">
+            <br>
+            <label for="endLng">End Longitude:</label>
+            <input type="text" id="endLng" placeholder="End Lng">
+            <br>
+            <button id="addPoints">Add Points</button>
+            <button id="optimizeRoute">Optimize Route</button>
+        </div>
+
+        <div>
+
+        </div>
+        
+    </div>
+   
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
