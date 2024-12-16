@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GeoServer and Leaflet Layer Switch</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <style>
+        #map {
+            width: 100%;
+            height: 100vh;
+        }
+    </style>
+</head>
+<body>
+
+<h1>GeoServer WMS and Leaflet Layer Switch</h1>
+<div id="map"></div>
+
+<!-- Layer Switch Control -->
+<div style="position: absolute; top: 10px; left: 10px; z-index: 1000;">
+    <label>
+        <input type="radio" id="leafletLayer" name="layerSwitch" checked /> OpenStreetMap
+    </label>
+    <label>
+        <input type="radio" id="geoserverLayer" name="layerSwitch" /> GeoServer WMS
+    </label>
+</div>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script>
+    // Initialize the map
+    var map = L.map('map', {
+        crs: L.CRS.EPSG3857 // Ensure Web Mercator projection
+    }).setView([51.505, -0.09], 13);  // Default coordinates and zoom level
+
+    // Add OpenStreetMap Layer (Leaflet)
+    var osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);  // Default layer
+
+    // Add GeoServer WMS Layer (Layer for testing)
+    var geoserverLayer = L.tileLayer.wms('http://localhost:8080/geoserver/wegemappe/wms', {
+        layers: 'wegemappe:gis_osm_buildings',
+        format: 'image/png',
+        transparent: true,
+        srs: 'EPSG:3857',
+        version: '1.1.0'
+    });
+
+    // Layer control setup
+    document.getElementById('leafletLayer').addEventListener('change', function() {
+        if (this.checked) {
+            map.removeLayer(geoserverLayer);  // Remove GeoServer layer if selected Leaflet layer
+            map.addLayer(osmLayer);  // Add OpenStreetMap layer
+        }
+    });
+
+    document.getElementById('geoserverLayer').addEventListener('change', function() {
+        if (this.checked) {
+            map.removeLayer(osmLayer);  // Remove OpenStreetMap layer if selected GeoServer layer
+            map.addLayer(geoserverLayer);  // Add GeoServer WMS layer
+        }
+    });
+</script>
+</body>
+</html>
