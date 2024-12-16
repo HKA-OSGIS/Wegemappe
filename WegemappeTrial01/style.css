@@ -1,0 +1,104 @@
+/* Ensure the map takes up the majority of the space */
+
+* {
+    box-sizing: border-box;
+  }
+  
+  body {
+    margin: 0;
+  }
+  
+  /* Style the header */
+  .header {
+    background-color: #f1f1f1;
+    padding: 20px;
+    text-align: center;
+  }
+  
+  /* Style the top navigation bar */
+  .topnav {
+    overflow: hidden;
+    background-color: #333;
+  }
+  
+  /* Style the topnav links */
+  .topnav a {
+    float: left;
+    display: block;
+    color: #f2f2f2;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+  }
+  
+  /* Change color on hover */
+  .topnav a:hover {
+    background-color: #ddd;
+    color: black;
+  }
+  
+  /* Create three equal columns that floats next to each other */
+  .column {
+    float: left;
+    width: 50%;
+    padding: 15px;
+  }
+  
+  /* Clear floats after the columns */
+  .row::after {
+    content: "";
+    display: table;
+    clear: both;
+  }
+  
+  /* Responsive layout - makes the three columns stack on top of each other instead of next to each other */
+  @media screen and (max-width:600px) {
+    .column {
+      width: 100%;
+    }
+  }
+
+
+
+#map {
+    height: 100vh;  /* Make the map full screen */
+    width: 100%;     /* Map takes up 75% of the screen width */
+    float: left;    /* Float the map to the left */
+}
+
+/* Route Settings Panel */
+#right-top {
+    position: absolute;
+    top: 10%;
+    right: 2%;
+    padding: 20px;
+    width: 20%; /* Adjust width of the controls panel */
+}
+
+#right-top h2 {
+    margin-top: 0;
+}
+
+/* Input fields and buttons */
+#right-top input[type="text"] {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 10px;
+    border-radius: 4px;
+}
+
+#right-top button:hover {
+    background-color: #45a049;
+}
+
+/* Optional style for bottom-right section (if needed later) */
+#bottom-right-layout {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    background-color: rgba(0, 0, 0, 0.5);
+    color: white;
+    padding: 10px;
+    border-radius: 5px;
+    font-size:14px;
+}
