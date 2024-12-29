@@ -21,7 +21,7 @@ function findNearbyPetrolPumps(bounds) {
                             iconSize: [32, 32],
                         })
                     }).addTo(map);
-                    marker.bindPopup(`Petrol Pump: ${pump.tags.name || 'Unknown'}`).openPopup();
+                    //marker.bindPopup(`Petrol Pump: ${pump.tags.name || 'Unknown'}`).openPopup();
                     petrolPumpMarkers.push(marker);
                 });
             } else {

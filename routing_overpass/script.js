@@ -33,6 +33,7 @@ function updateRoute() {
         .catch(error => console.error("Error fetching route:", error));
 }
 
+
 // Show route distance on the map (in kilometers)
 function showRouteDistance(distance) {
     const distanceInKm = (distance / 1000).toFixed(2);
@@ -87,6 +88,32 @@ document.getElementById("reset-map").addEventListener("click", () => {
     if (routeLayer) map.removeLayer(routeLayer);
     petrolPumpMarkers.forEach(marker => map.removeLayer(marker));
     petrolPumpMarkers = [];
+});
+
+//Optimize Pump Route
+document.getElementById("optimize-pump-route").addEventListener("click",()=>{
+
+    //var pumpRoute=[startMarker]
+    const start = startMarker.getLatLng();
+    const pump = petrolPumpMarkers[0].getLatLng();
+    const end = endMarker.getLatLng();
+    //var polyline = L.polyline([startMarker.getLatLng(),petrolPumpMarkers[0].getLatLng(),endMarker.getLatLng()]);
+    const url = `https://router.project-osrm.org/route/v1/driving/${start.lng},${start.lat};${pump.lng},${pump.lat};${end.lng},${end.lat}?overview=full&geometries=geojson`;
+
+    fetch(url)
+        .then(response => response.json())
+        .then(data => {
+            if (routeLayer) map.removeLayer(routeLayer); // Remove previous route
+            if (data.routes && data.routes.length > 0) {
+                routeLayer = L.geoJSON(data.routes[0].geometry).addTo(map);
+                map.fitBounds(routeLayer.getBounds());
+                showRouteDistance(data.routes[0].distance); // Show distance of the first route
+                //findNearbyPetrolPumps(routeLayer.getBounds()); // Find petrol stations along the route
+            } else {
+                alert("No route found!");
+            }
+        })
+        .catch(error => console.error("Error fetching route:", error));
 });
 
 
