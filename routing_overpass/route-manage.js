@@ -23,6 +23,9 @@ function findNearbyPetrolPumps(bounds) {
                     }).addTo(map);
                     marker.bindPopup(`Petrol Pump: ${pump.tags.name || 'Unknown'}`).openPopup();
                     petrolPumpMarkers.push(marker);
+                    
+
+
                 });
             } else {
                 alert("No petrol pumps found nearby.");
