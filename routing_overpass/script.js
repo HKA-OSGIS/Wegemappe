@@ -10,6 +10,7 @@ let endMarker = L.marker([51.515, -0.1], { draggable: true }).addTo(map).bindPop
 
 let routeLayer = null; // To store the current route layer
 let petrolPumpMarkers = []; // To store the petrol pump markers
+let shortestDistance = []; //To store shortest distance from table request of petrol pumps
 
 // Update route based on markers
 function updateRoute() {
@@ -90,30 +91,96 @@ document.getElementById("reset-map").addEventListener("click", () => {
     petrolPumpMarkers = [];
 });
 
-//Optimize Pump Route
-document.getElementById("optimize-pump-route").addEventListener("click",()=>{
+//function that returns column index of min column sum of distance table, then used to get min distance pump
+function findMinColumnIndex(matrix) {
+    if (!Array.isArray(matrix) || matrix.length === 0 || !Array.isArray(matrix[0])) {
+        throw new Error("Invalid matrix");
+    }
 
-    //var pumpRoute=[startMarker]
+    const numRows = matrix.length;
+    const numCols = matrix[0].length;
+
+    // Calculate the sum of each column
+    const columnSums = Array(numCols).fill(0);
+    for (let row = 0; row < numRows; row++) {
+        for (let col = 0; col < numCols; col++) {
+            columnSums[col] += matrix[row][col];
+        }
+    }
+
+    // Find the minimum value greater than 0, excluding the first two columns
+    let minSum = Infinity;
+    let minIndex = -1;
+
+    for (let col = 2; col < numCols; col++) { // Start from column 2 to skip the first two columns
+        if (columnSums[col] > 0 && columnSums[col] < minSum) {
+            minSum = columnSums[col];
+            minIndex = col;
+        }
+    }
+
+    return minIndex; // Return the index of the column, or -1 if no valid column is found
+}
+
+
+//Table request for getting shortest distance pump
+document.getElementById("optimize-pump-route").addEventListener("click", () => {
+//function shortestDistancePump(startMarker,endMarker,petrolPumpMarkers){
     const start = startMarker.getLatLng();
-    const pump = petrolPumpMarkers[0].getLatLng();
     const end = endMarker.getLatLng();
-    //var polyline = L.polyline([startMarker.getLatLng(),petrolPumpMarkers[0].getLatLng(),endMarker.getLatLng()]);
-    const url = `https://router.project-osrm.org/route/v1/driving/${start.lng},${start.lat};${pump.lng},${pump.lat};${end.lng},${end.lat}?overview=full&geometries=geojson`;
+    var pump = new Object;
 
-    fetch(url)
+    var arrayline = [];
+    arrayline.push(start);
+    arrayline.push(end);
+    for (let i=0;i<petrolPumpMarkers.length;i++){
+        arrayline.push(petrolPumpMarkers[i].getLatLng());     
+    };
+
+    var str = new String("");
+    for (let i=0;i<arrayline.length;i++){
+        str += String(arrayline[i].lng)+","+String(arrayline[i].lat)+";"; 
+    };
+    str = str.slice(0,-1);
+    
+    const distanceTable = `https://router.project-osrm.org/table/v1/driving/${str}?sources=0;1&annotations=distance`;
+
+    
+
+    fetch(distanceTable)
         .then(response => response.json())
         .then(data => {
-            if (routeLayer) map.removeLayer(routeLayer); // Remove previous route
-            if (data.routes && data.routes.length > 0) {
-                routeLayer = L.geoJSON(data.routes[0].geometry).addTo(map);
-                map.fitBounds(routeLayer.getBounds());
-                showRouteDistance(data.routes[0].distance); // Show distance of the first route
-                //findNearbyPetrolPumps(routeLayer.getBounds()); // Find petrol stations along the route
-            } else {
-                alert("No route found!");
-            }
-        })
-        .catch(error => console.error("Error fetching route:", error));
+            console.log(data.distances);
+            const index = findMinColumnIndex(data.distances);
+            
+            console.log(index);
+            pump = data.destinations[index].location
+            console.log(pump);
+            
+
+            const url = `https://router.project-osrm.org/route/v1/driving/${start.lng},${start.lat};${pump[0]},${pump[1]};${end.lng},${end.lat}?overview=full&geometries=geojson`;
+    
+
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    if (routeLayer) map.removeLayer(routeLayer); // Remove previous route
+                    if (data.routes && data.routes.length > 0) {
+                        routeLayer = L.geoJSON(data.routes[0].geometry).addTo(map);
+                        map.fitBounds(routeLayer.getBounds());
+                        showRouteDistance(data.routes[0].distance); // Show distance of the first route
+                        //findNearbyPetrolPumps(routeLayer.getBounds()); // Find petrol stations along the route
+                    } else {
+                        alert("No route found!");
+                    }
+                })
+                .catch(error => console.error("Error fetching route:", error));
+            
+        }); //distance table end
+
+       
+    
+
 });
 
 
