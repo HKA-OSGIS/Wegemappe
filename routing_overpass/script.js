@@ -120,12 +120,15 @@ function findMinColumnIndex(matrix) {
     }
 
     return minIndex; // Return the index of the column, or -1 if no valid column is found
-}
+};
 
 
 //Table request for getting shortest distance pump
 document.getElementById("optimize-pump-route").addEventListener("click", () => {
-//function shortestDistancePump(startMarker,endMarker,petrolPumpMarkers){
+    shortestDistancePump(startMarker,endMarker);
+    });
+
+function shortestDistancePump(startMarker,endMarker){
     const start = startMarker.getLatLng();
     const end = endMarker.getLatLng();
     var pump = new Object;
@@ -179,9 +182,9 @@ document.getElementById("optimize-pump-route").addEventListener("click", () => {
         }); //distance table end
 
        
-    
+};
 
-});
+
 
 
 //location

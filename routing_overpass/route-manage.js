@@ -1,12 +1,12 @@
 // Find nearby petrol pumps along the route using Overpass API
-function findNearbyPetrolPumps(bounds) {
+function findNearbyPetrolPumps(bounds, around=5000) {
     // Clear existing markers
     petrolPumpMarkers.forEach(marker => map.removeLayer(marker));
     petrolPumpMarkers = [];
 
     const sw = bounds.getSouthWest();
     const ne = bounds.getNorthEast();
-    const overpassUrl = `https://overpass-api.de/api/interpreter?data=[out:json];(node["amenity"="fuel"](around:5000,${(sw.lat + ne.lat) / 2},${(sw.lng + ne.lng) / 2}););out;`;
+    const overpassUrl = `https://overpass-api.de/api/interpreter?data=[out:json];(node["amenity"="fuel"](around:${around},${(sw.lat + ne.lat) / 2},${(sw.lng + ne.lng) / 2}););out;`;
 
     fetch(overpassUrl)
         .then(response => response.json())
@@ -14,7 +14,6 @@ function findNearbyPetrolPumps(bounds) {
             if (data && data.elements.length > 0) {
                 data.elements.forEach(pump => {
                     const lat = pump.lat;
-                    console.log("Hi");
                     const lon = pump.lon;
                     const marker = L.marker([lat, lon], {
                         icon: L.icon({
@@ -24,11 +23,12 @@ function findNearbyPetrolPumps(bounds) {
                     }).addTo(map);
                     //marker.bindPopup(`Petrol Pump: ${pump.tags.name || 'Unknown'}`).openPopup();
                     petrolPumpMarkers.push(marker);
-                    //console.log(data);
+                    
                     //console.log(data.elements);
                     //console.log(data.elements[0]);
-                    console.log(data.elements.length);
+                    //console.log(data.elements.length);
                 });
+                console.log(data);
             } else {
                 alert("No petrol pumps found nearby.");
             }
