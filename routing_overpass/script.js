@@ -190,7 +190,10 @@ function shortestDistancePump(startMarker,endMarker,petrolPumpMarkers){
 
 //This function assumes you are starting trip with a full tank
 function minimize_Distance_pumps(maxFuel,minFuelLimit,efficiency){
-
+    if(maxFuel=="" || minFuelLimit=="" || efficiency==""){
+        alert("All fields must be filled");
+        throw new Error("Inputs missing");
+    };
     var autonomy = (maxFuel)*efficiency; //autonomy of vehicle (how far it can drive) in Km
     var minFuelLimit = minFuelLimit/100; //convert it to decimal for ease of calculations
     const start = startMarker.getLatLng();
