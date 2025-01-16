@@ -1,12 +1,12 @@
 // Initialize the map
-const map = L.map('map').setView([51.505, -0.09], 13);
+const map = L.map('map').setView([49.013995, 8.404420], 13);
 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
     attribution: '&copy; OpenStreetMap contributors'
 }).addTo(map);
 
 // Initialize draggable markers for start and end points
-let startMarker = L.marker([51.505, -0.09], { draggable: true }).addTo(map).bindPopup('Start Point').openPopup();
-let endMarker = L.marker([51.515, -0.1], { draggable: true }).addTo(map).bindPopup('End Point').openPopup();
+let startMarker = L.marker([49.012255, 8.386279], { draggable: true }).addTo(map).bindPopup('Start Point').openPopup();
+let endMarker = L.marker([49.009432, 8.406766], { draggable: true }).addTo(map).bindPopup('End Point').openPopup();
 
 let routeLayer = null; // To store the current route layer
 let petrolPumpMarkers = []; // To store the petrol pump markers
@@ -83,9 +83,9 @@ document.getElementById("calculate-route").addEventListener("click", updateRoute
 
 // Reset the map
 document.getElementById("reset-map").addEventListener("click", () => {
-    map.setView([51.505, -0.09], 13);
-    startMarker.setLatLng([51.505, -0.09]);
-    endMarker.setLatLng([51.515, -0.1]);
+    map.setView([49.013995, 8.404420], 13);
+    startMarker.setLatLng([49.012255, 8.386279]);
+    endMarker.setLatLng([49.009432, 8.406766]);
     if (routeLayer) map.removeLayer(routeLayer);
     petrolPumpMarkers.forEach(marker => map.removeLayer(marker));
     petrolPumpMarkers = [];
@@ -125,10 +125,10 @@ function findMinColumnIndex(matrix) {
 
 //Table request for getting shortest distance pump
 document.getElementById("optimize-pump-route").addEventListener("click", () => {
-    shortestDistancePump(startMarker,endMarker);
+    shortestDistancePump(startMarker,endMarker,petrolPumpMarkers);
     });
 
-function shortestDistancePump(startMarker,endMarker){
+function shortestDistancePump(startMarker,endMarker,petrolPumpMarkers){
     const start = startMarker.getLatLng();
     const end = endMarker.getLatLng();
     var pump = new Object;
@@ -139,6 +139,8 @@ function shortestDistancePump(startMarker,endMarker){
     for (let i=0;i<petrolPumpMarkers.length;i++){
         arrayline.push(petrolPumpMarkers[i].getLatLng());     
     };
+    console.log("Arrayline next:")
+    console.log(arrayline)
 
     var str = new String("");
     for (let i=0;i<arrayline.length;i++){
@@ -153,10 +155,12 @@ function shortestDistancePump(startMarker,endMarker){
     fetch(distanceTable)
         .then(response => response.json())
         .then(data => {
+            console.log("data.distances Next:")
             console.log(data.distances);
-            const index = findMinColumnIndex(data.distances);
-            
-            console.log(index);
+            var index = findMinColumnIndex(data.distances);
+            console.log("index NEXT:")
+            console.log(index)
+
             pump = data.destinations[index].location
             console.log(pump);
             
@@ -184,7 +188,102 @@ function shortestDistancePump(startMarker,endMarker){
        
 };
 
+//This function assumes you are starting trip with a full tank
+function minimize_Distance_pumps(maxFuel,minFuelLimit,efficiency){
 
+    var autonomy = (maxFuel)*efficiency; //autonomy of vehicle (how far it can drive) in Km
+    var minFuelLimit = minFuelLimit/100; //convert it to decimal for ease of calculations
+    const start = startMarker.getLatLng();
+    const end = endMarker.getLatLng();
+    const url = `https://router.project-osrm.org/route/v1/driving/${start.lng},${start.lat};${end.lng},${end.lat}?overview=full&geometries=geojson`;
+
+    fetch(url)
+        .then(response => response.json())
+        .then(data => {
+            if (routeLayer) map.removeLayer(routeLayer); // Remove previous route
+            if (data.routes && data.routes.length > 0) {
+                var route = data.routes[0].geometry;
+                var totalDistance = turf.length(route); //give total distance of trip
+                console.log(`total distance:${totalDistance} Km`);
+                console.log(`max Fuel: ${maxFuel} L`);
+                console.log(`Fuel limit: ${minFuelLimit*100}%`);
+                console.log(`efficiency: ${efficiency} Km/L`);
+                console.log(`autonomy: ${autonomy} Km`)
+                var tripSegments = Math.floor(totalDistance/autonomy); //number of segments of trip, each segment between searchPoints from which pumps are searched in a radius
+                console.log(`Trip segments: ${tripSegments}`);
+                //var searchPoints = {"type":"FeatureCollection","features":[]};
+                var searchPoints = [];
+                var pumps = [];
+                
+
+                //add if statement to stop routing if tripSegments<1
+                if (tripSegments<1){
+                    alert("No pump needed for this trip!");
+                    throw new Error("No pump needed");
+                };
+
+                for(let i = 0;i<tripSegments;i=i+1){
+                    //fix to use along point, otherwise think of another way
+                    //console.log(`i = ${i}`)
+                    //var along = turf.along(routeLayer,autonomy*(i+1)); //gets point along 'routeLayer' at an 'autonomy*(i+1)' distance from start point 
+                    //var result = {"type":"FeatureCollection","features":[route]};
+                    var entryPumpSearchDistance = autonomy*(i+1) - (minFuelLimit+minFuelLimit/2)*maxFuel*efficiency;
+                    var exitPumpSearchDistance = autonomy*(i+1) - (minFuelLimit-minFuelLimit/2)*maxFuel*efficiency;
+                    console.log(`search range is: ${entryPumpSearchDistance} - ${exitPumpSearchDistance}`);
+                    var entryToPumpSearchArea = turf.along(route,entryPumpSearchDistance);
+                    var exitFromPumpSearchArea = turf.along(route,exitPumpSearchDistance);
+                    
+                    //var collection = turf.featureCollection([entryToPumpSearchArea,exitFromPumpSearchArea]);
+                    //console.log(collection);
+
+                    //var bbox = turf.bbox(collection);
+                    //console.log(bbox);
+                    var Lentry = L.geoJSON(entryToPumpSearchArea);
+                    var Lexit = L.geoJSON(exitFromPumpSearchArea);
+                    //entry=Lentry.getBounds().getCenter().lat;
+                    //console.log(entry);
+                    var entrypointLeaflet = L.latLng(Lentry.getBounds().getCenter().lat, Lentry.getBounds().getCenter().lng);
+                    var exitpointLeaflet = L.latLng(Lexit.getBounds().getCenter().lat, Lexit.getBounds().getCenter().lng);
+                    
+                    var bounds = L.latLngBounds(entrypointLeaflet,exitpointLeaflet);
+                    console.log("LEAFLET POINTS NEXT:")
+                    console.log(entrypointLeaflet);
+                    console.log(exitpointLeaflet);
+                    console.log("LEAFLET POINTS END")
+                    var ini = L.marker(entrypointLeaflet).addTo(map);
+                    var fin = L.marker(exitpointLeaflet).addTo(map);
+                    var searchRadius = (autonomy*minFuelLimit*1000);
+
+                    findNearbyPetrolPumps(bounds,searchRadius);
+                    console.log("find Petrol Pumps, route after")
+                    shortestDistancePump(ini,fin,petrolPumpMarkers);               
+                    //var searchRadius = (autonomy*minFuelLimit);
+                    //findNearbyPetrolPumps(bounds,searchRadius);
+
+                };
+                
+            } else {
+                alert("No route found!");
+            }
+        })
+        .catch(error => console.error("Error fetching route:", error));
+
+
+};
+
+//Long trip form and function
+document.getElementById("LongTripForm").addEventListener("submit",function(event){
+    event.preventDefault();
+    const maxFuel = document.getElementById("maxFuel").value;
+    console.log(maxFuel);
+    const minFuelLimit = document.getElementById("minFuelLimit").value;
+    console.log(minFuelLimit);
+    const efficiency = document.getElementById("efficiency").value;
+    console.log(efficiency);
+
+    minimize_Distance_pumps(maxFuel,minFuelLimit,efficiency);
+
+});
 
 
 //location

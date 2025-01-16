@@ -1,15 +1,4 @@
 //This function assumes you are starting trip with a full tank
-document.getElementById("LongTripForm").addEventListener("submit",function(event){
-    event.preventDefault();
-    const maxFuel = document.getElementById("maxFuel").value;
-    const minFuelLimit = document.getElementById("minFuelLimit").value;
-    const efficiency = document.getElementById("efficiency").value;
-
-    minimize_Distance_pumps(maxFuel,minFuelLimit,efficiency);
-
-});
-
-
 function minimize_Distance_pumps(maxFuel,minFuelLimit,efficiency){
 
     var autonomy = (maxFuel)*efficiency; //autonomy of vehicle (how far it can drive) in Km
