@@ -8,7 +8,7 @@ function findNearbyPetrolPumps(bounds, around=5000) {
     const ne = bounds.getNorthEast();
     const overpassUrl = `https://overpass-api.de/api/interpreter?data=[out:json];(node["amenity"="fuel"](around:${around},${(sw.lat + ne.lat) / 2},${(sw.lng + ne.lng) / 2}););out;`;
 
-    fetch(overpassUrl)
+    return fetch(overpassUrl)
         .then(response => response.json())
         .then(data => {
             if (data && data.elements.length > 0) {
