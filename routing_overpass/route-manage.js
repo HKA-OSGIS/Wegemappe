@@ -21,20 +21,19 @@ function findNearbyPetrolPumps(bounds, around=5000) {
                             iconSize: [32, 32],
                         })
                     }).addTo(map);
-                    //marker.bindPopup(`Petrol Pump: ${pump.tags.name || 'Unknown'}`).openPopup();
+
                     petrolPumpMarkers.push(marker);
                     
-                    //console.log(data.elements);
-                    //console.log(data.elements[0]);
-                    //console.log(data.elements.length);
                 });
-                console.log(data);
+                
+                return petrolPumpMarkers;
+
             } else {
                 alert("No petrol pumps found nearby.");
             }
         })
         .catch(error => console.error("Error fetching petrol pumps:", error));
-}
+};
 
 
 
