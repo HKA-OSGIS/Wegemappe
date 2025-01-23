@@ -172,11 +172,12 @@ function shortestDistancePump(startMarker,endMarker,petrolPumpMarkers){
             routeArray.push(start);
             routeArray.push(`${pump[0]},${pump[1]}`);
             routeArray.push(end);
-            return routeArray;
+            //return routeArray;
             //const url = `https://router.project-osrm.org/route/v1/driving/${start.lng},${start.lat};${pump[0]},${pump[1]};${end.lng},${end.lat}?overview=full&geometries=geojson`;
 
             
-        }); //distance table end
+        }) //distance table end
+        .then( routeArray => routeArray) //FIX THIS
 
        
 };
