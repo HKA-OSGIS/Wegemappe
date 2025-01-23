@@ -252,6 +252,13 @@ async function minimize_Distance_pumps(maxFuel, minFuelLimit, efficiency) {
                     console.log("Found petrol pumps, routing after this line");
 
                     const shortestDistanceResults = await shortestDistancePump(ini, fin, petrolPumpMarkers);
+                    const uni_pump = shortestDistanceResults[2];
+                    const marker = L.marker([uni_pump.lat, uni_pump.lng], {
+                        icon: L.icon({
+                            iconUrl: 'chosen-fuel-icon.png', // Path to your fuel icon image
+                            iconSize: [32, 32],
+                                    })
+                    }).addTo(map);
 
                     // Concatenate the results into the results array
                     results = results.concat(shortestDistanceResults);
@@ -287,6 +294,7 @@ document.getElementById("LongTripForm").addEventListener("submit", async functio
 
     const results = await minimize_Distance_pumps(maxFuel, minFuelLimit, efficiency);
     console.log(`the final array route is: ${results}`)
+
     let str = results.map(point => `${point.lng},${point.lat}`).join(";");
     const finalrouteUrl = `https://router.project-osrm.org/route/v1/driving/${str}?overview=full&geometries=geojson`;
     const finalrouteResponse = await fetch(finalrouteUrl);
