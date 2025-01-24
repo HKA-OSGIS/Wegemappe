@@ -183,6 +183,9 @@ async function shortestDistancePump(startMarker, endMarker, petrolPumpMarkers) {
         return [start, null, end]; // Handle failure gracefully
     }
 }
+
+
+
     
 
 //This function assumes you are starting trip with a full tank
